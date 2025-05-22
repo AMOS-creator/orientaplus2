@@ -1,0 +1,167 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OrientaPlus - Orientation Post-Bac</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+</head>
+<body class="bg-blue-50 font-sans">
+
+  <header class="bg-white shadow-md">
+    <!-- Tu peux ajouter une image ici -->
+    <div class="max-w-7xl mx-auto flex justify-between items-center p-4">
+      <h1 class="text-xl md:text-2xl font-bold text-blue-700">ORIENTAPLUS</h1>
+      <nav class="hidden md:flex space-x-6 text-gray-600 text-sm md:text-base">
+        <a href="#" class="hover:text-blue-600">Accueil</a>
+        <a href="#" class="hover:text-blue-600">Aide</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-xl mx-auto mt-8 bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-4 text-center">Orientation Universitaire</h2>
+    <p class="mb-6 text-gray-600 text-sm text-center">Renseigne tes notes pour découvrir tes options de filière après le bac.</p>
+
+    <form id="orientationForm" class="space-y-4">
+      <div>
+        <label for="serie" class="block text-sm font-medium text-gray-700">Série du Bac</label>
+        <select id="serie" class="w-full mt-1 p-2 border rounded-md" onchange="afficherMatieres()">
+          <option value="">-- Choisissez une série --</option>
+          <option value="D">Série D</option>
+          <option value="C">Série C</option>
+          <option value="A1">Série A1</option>
+          <option value="A2">Série A2</option>
+          <option value="G">Série G</option>
+          <option value="F">Série F</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="moyenne" class="block text-sm font-medium text-gray-700">Moyenne générale</label>
+        <input type="number" step="0.1" id="moyenne" class="w-full mt-1 p-2 border rounded-md" placeholder="ex: 13.5" />
+      </div>
+
+      <div id="notesContainer"></div>
+
+      <button type="button" onclick="afficherFilieres()" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">Voir les filières</button>
+    </form>
+
+    <div id="resultats" class="mt-6 hidden">
+      <h3 class="text-lg font-semibold text-gray-800 mb-2">Filières suggérées :</h3>
+      <ul id="listeFilieres" class="list-disc pl-5 text-gray-700 space-y-1 text-sm"></ul>
+    </div>
+  </main>
+
+  <footer class="text-center text-gray-600 text-sm py-6 mt-10">
+    © 2025 OrientaPlus – Tous droits réservés<br/>
+    Créateur : ALIPOEH Paulin K. A. – <a href="mailto:amosgallagher88@gmail.com" class="text-blue-600 hover:underline">amosgallagher88@gmail.com</a><br/>
+    WhatsApp : <a href="https://wa.me/22870059900" class="text-blue-600 hover:underline">+228 70 05 99 00</a>
+  </footer>
+
+  <script>
+    function afficherMatieres() {
+      const serie = document.getElementById('serie').value;
+      const container = document.getElementById('notesContainer');
+      container.innerHTML = '';
+
+      const matieresParSerie = {
+        D: ["Mathématiques", "Physique-Chimie", "SVT"],
+        C: ["Mathématiques", "Physique-Chimie", "SVT"],
+        A1: ["Français", "Philosophie", "Histoire-Géographie", "Anglais"],
+        A2: ["Français", "Philosophie", "Histoire-Géographie", "Anglais"],
+        G: ["Économie", "Comptabilité", "Marketing"],
+        F: ["Technologie", "Électronique", "Électricité"]
+      };
+
+      const matieres = matieresParSerie[serie] || [];
+
+      matieres.forEach(matiere => {
+        const label = document.createElement("label");
+        label.className = "block mt-3 text-sm font-medium text-gray-700";
+        label.textContent = matiere;
+
+        const input = document.createElement("input");
+        input.type = "number";
+        input.step = "0.1";
+        input.placeholder = matiere;
+        input.className = "w-full p-2 border rounded-md mt-1";
+        input.name = "note_" + matiere.replace(/[^a-zA-Z]/g, '').toLowerCase();
+
+        container.appendChild(label);
+        container.appendChild(input);
+      });
+    }
+
+    function afficherFilieres() {
+      const serie = document.getElementById('serie').value;
+      const moyenne = parseFloat(document.getElementById('moyenne').value);
+      const notesInputs = document.querySelectorAll('#notesContainer input');
+      const notes = {};
+      notesInputs.forEach(input => {
+        notes[input.name] = parseFloat(input.value) || 0;
+      });
+
+      const resultatsDiv = document.getElementById("resultats");
+      const liste = document.getElementById("listeFilieres");
+      liste.innerHTML = "";
+
+      const options = {
+        D: [
+          { seuil: 14, conditions: () => notes["notesvt"] >= 12, filieres: ["Médecine", "Pharmacie"] },
+          { seuil: 14, filieres: ["Ingénierie", "Informatique"] },
+          { seuil: 12, filieres: ["Biologie", "Géologie", "Sciences Agronomiques"] },
+          { seuil: 10, filieres: ["BTS Agro", "Environnement"] }
+        ],
+        C: [
+          { seuil: 14, conditions: () => notes["notesvt"] >= 12, filieres: ["Médecine"] },
+          { seuil: 14, filieres: ["Ingénierie", "Informatique", "Télécoms"] },
+          { seuil: 12, filieres: ["Mathématiques", "Statistiques", "Technologies"] },
+          { seuil: 10, filieres: ["BTS Électronique", "Mécanique"] }
+        ],
+        A1: [
+          { seuil: 12, filieres: ["Droit", "Économie", "Histoire", "Langues"] },
+          { seuil: 10, filieres: ["Lettres modernes", "Sciences sociales"] }
+        ],
+        A2: [
+          { seuil: 12, filieres: ["Droit", "Lettres", "Communication"] },
+          { seuil: 10, filieres: ["Langues", "Philosophie", "Sociologie"] }
+        ],
+        G: [
+          { seuil: 12, filieres: ["Gestion", "Comptabilité", "Marketing"] },
+          { seuil: 10, filieres: ["BTS Finance", "BTS Commerce", "Entrepreneuriat"] }
+        ],
+        F: [
+          { seuil: 12, filieres: ["Génie mécanique", "Génie électrique", "Électronique"] },
+          { seuil: 10, filieres: ["Maintenance industrielle", "BTS Réseaux"] }
+        ]
+      };
+
+      let filieres = [];
+      if (options[serie]) {
+        options[serie].forEach(option => {
+          const conditionOK = option.conditions ? option.conditions() : true;
+          if (moyenne >= option.seuil && conditionOK) {
+            filieres = filieres.concat(option.filieres);
+          }
+        });
+      }
+
+      if (filieres.length > 0) {
+        filieres.forEach(f => {
+          const li = document.createElement("li");
+          li.textContent = f;
+          liste.appendChild(li);
+        });
+      } else {
+        const li = document.createElement("li");
+        li.textContent = "Aucune filière trouvée pour cette série avec cette moyenne.";
+        liste.appendChild(li);
+      }
+
+      resultatsDiv.classList.remove("hidden");
+    }
+  </script>
+</body>
+</html>
